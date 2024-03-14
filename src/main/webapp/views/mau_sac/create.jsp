@@ -11,7 +11,7 @@
     <title>Title</title>
 </head>
 <body>
-    <form method="POST" action="/SD19306_SOF3011_war_exploded/mau-sac/create">
+    <form method="POST" action="/SD19306_SOF3011_war/mau-sac/store">
         <div>
             <label>Mã</label>
             <input type="text" name="ma" />
