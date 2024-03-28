@@ -6,10 +6,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.beanutils.BeanUtils;
 import repositories.MauSacRepository;
 import utils.DBContext;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -76,12 +78,13 @@ public class MauSacServlet extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-        String ma = request.getParameter("ma");
-        String ten = request.getParameter("ten");
-        String ttS = request.getParameter("trangThai");
-        int trangThai = Integer.parseInt(ttS);
-        MauSac ms = new MauSac(null, ma, ten, trangThai);
-        this.ds.add(ms);
+        MauSac ms = new MauSac();
+        try {
+            BeanUtils.populate(ms, request.getParameterMap());
+            this.msRepo.insert(ms);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         request.setAttribute("data", ms);
         request.setAttribute("ds", ds);
@@ -92,14 +95,9 @@ public class MauSacServlet extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-        String ma = request.getParameter("ma");
-        for (int i = 0; i < this.ds.size(); i++) {
-            MauSac c = this.ds.get(i);
-            if (c.getMa().equals( ma )) {
-                request.setAttribute("ms", c);
-            }
-        }
-
+        String idS = request.getParameter("id");
+        int id = Integer.parseInt(idS);
+        request.setAttribute("ms", this.msRepo.findById(id));
         request.getRequestDispatcher("/views/mau_sac/edit.jsp")
                 .forward(request, response);
     }
@@ -108,18 +106,14 @@ public class MauSacServlet extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
+        String idS = request.getParameter("id");
         String ma = request.getParameter("ma");
         String ten = request.getParameter("ten");
         String ttS = request.getParameter("trangThai");
+        int id = Integer.parseInt(idS);
         int trangThai = Integer.parseInt(ttS);
-        MauSac ms = new MauSac(null, ma, ten, trangThai);
-
-        for (int i = 0; i < this.ds.size(); i++) {
-            MauSac c = this.ds.get(i);
-            if (c.getMa().equals( ms.getMa() )) {
-                this.ds.set(i, ms);
-            }
-        }
+        MauSac ms = new MauSac(id, ma, ten, trangThai);
+        this.msRepo.update(ms);
 
         response.sendRedirect("/SD19306_SOF3011_war/mau-sac/index");
     }
@@ -133,17 +127,15 @@ public class MauSacServlet extends HttpServlet {
         request.getRequestDispatcher("/views/mau_sac/index.jsp")
                 .forward(request, response);
     }
+
     public void delete(
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-        String ma = request.getParameter("ma");
-        for (int i = 0; i < this.ds.size(); i++) {
-            MauSac c = this.ds.get(i);
-            if (c.getMa().equals( ma )) {
-                this.ds.remove(i);
-            }
-        }
+        String idS = request.getParameter("id");
+        int id = Integer.parseInt(idS);
+        MauSac ms = this.msRepo.findById(id);
+        this.msRepo.delete(ms);
 
         response.sendRedirect("/SD19306_SOF3011_war/mau-sac/index");
     }

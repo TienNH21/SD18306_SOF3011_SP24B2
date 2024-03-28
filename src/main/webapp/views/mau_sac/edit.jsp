@@ -11,7 +11,7 @@
     <title>Title</title>
 </head>
 <body>
-    <form method="POST" action="/SD19306_SOF3011_war/mau-sac/update">
+    <form method="POST" action="/SD19306_SOF3011_war/mau-sac/update?id=${ms.id}">
         <div>
             <label>Mã</label>
             <input type="text" name="ma" value="${ ms.ma }" />

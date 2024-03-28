@@ -61,4 +61,9 @@ public class MauSacRepository {
 
         return result;
     }
+
+    public MauSac findById(int id)
+    {
+        return this.hSession.find(MauSac.class, id);
+    }
 }
