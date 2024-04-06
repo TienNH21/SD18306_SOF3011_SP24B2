@@ -66,4 +66,12 @@ public class MauSacRepository {
     {
         return this.hSession.find(MauSac.class, id);
     }
+
+    public MauSac getByIdAndMa(Integer id, String ma) {
+        String hql = "SELECT entity FROM MauSac entity WHERE entity.id <> ?1 AND entity.ma = ?2";
+        TypedQuery<MauSac> q = this.hSession.createQuery(hql, MauSac.class);
+        q.setParameter(1, id);
+        q.setParameter(2, ma);
+        return q.getSingleResult();
+    }
 }

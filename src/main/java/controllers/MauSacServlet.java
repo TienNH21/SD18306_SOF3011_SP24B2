@@ -110,12 +110,68 @@ public class MauSacServlet extends HttpServlet {
         String ma = request.getParameter("ma");
         String ten = request.getParameter("ten");
         String ttS = request.getParameter("trangThai");
-        int id = Integer.parseInt(idS);
-        int trangThai = Integer.parseInt(ttS);
-        MauSac ms = new MauSac(id, ma, ten, trangThai);
-        this.msRepo.update(ms);
+        Integer trangThai = null, id = null;
+
+        // Check trống
+        if (
+            idS == null || idS.trim().length() == 0 ||
+            ma == null || ma.trim().length() == 0 ||
+            ten== null || ten.trim().length() == 0 ||
+            ttS == null || ttS.trim().length() == 0
+        ) {
+            this.error(request, response, "Không được để trống", "/mau-sac/edit?id=" + idS);
+            return ;
+        }
+
+        // Check độ dài
+        if (ma.trim().length() > 255 || ten.trim().length() > 255) {
+            this.error(request, response, "Mã/Tên tối đa 255 kí tự", "/mau-sac/edit?id=" + idS);
+            return ;
+        }
+
+        // Check trạng thái
+        try {
+            trangThai = Integer.parseInt(ttS);
+            if (trangThai != 0 && trangThai != 1) {
+                new Exception();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.error(request, response, "Trạng thái không hợp lệ", "/mau-sac/edit?id=" + idS);
+            return ;
+        }
+
+        // Check ID là số
+        try {
+            id = Integer.parseInt(idS);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            this.error(request, response, "ID không hợp lệ", "/mau-sac/index");
+            return ;
+        }
+
+        // Check ID tồn tại
+        MauSac ms = this.msRepo.findById(id);
+        if (ms == null) {
+            this.error(request, response, "ID không tồn tại", "/mau-sac/index");
+            return ;
+        }
+
+        MauSac ms1 = this.msRepo.getByIdAndMa(ms.getId(), ms.getMa());
+        if (ms1 != null) {
+            this.error(request, response, "", "/mau-sac/index");
+            return ;
+        }
+
+        MauSac newVal = new MauSac(id, ma, ten, trangThai);
+        this.msRepo.update(newVal);
 
         response.sendRedirect("/SD19306_SOF3011_war/mau-sac/index");
+    }
+
+    public void error(HttpServletRequest request, HttpServletResponse res, String message, String url) throws IOException {
+        request.getSession().setAttribute("error", message);
+        res.sendRedirect(url);
     }
 
     public void index(
